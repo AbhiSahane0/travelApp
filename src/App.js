@@ -29,7 +29,7 @@ function App() {
           onDelete={deleteItem}
           handleBoxClick={handleBoxClick}
         />
-        <Stats />
+        <Stats item={item} />
       </div>
     </>
   );
@@ -118,12 +118,25 @@ function PackingList({ items, onDelete, handleBoxClick }) {
   );
 }
 
-function Stats() {
-  return (
-    <footer className="stats">
-      <em>
-        You have X items in your list and you have already picked up X (x%)
-      </em>
-    </footer>
-  );
+function Stats({ item }) {
+  if (item.length >= 1) {
+    const length = item.length;
+    const packed = item.filter((items) => items.packed === true).length;
+    const percentage = Math.round(length / packed) * 100;
+    return (
+      <footer className="stats">
+        <em>
+          You have {length} items in your list and you have already picked up{" "}
+          {packed} item (
+          {percentage > 0 && percentage <= 100 ? percentage : 0 + "%"})
+        </em>
+      </footer>
+    );
+  } else {
+    return (
+      <footer className="stats">
+        <em>Start packing item now ✈️</em>
+      </footer>
+    );
+  }
 }
