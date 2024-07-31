@@ -1,18 +1,34 @@
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: true },
-  { id: 3, description: "Passports", quantity: 2, packed: false },
-];
-
 function App() {
+  const [item, setItem] = useState([]);
+
+  function handleAddItem(item) {
+    setItem((items) => [...items, item]);
+  }
+
+  function handleBoxClick(id) {
+    setItem((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+
+  function deleteItem(id) {
+    setItem((items) => items.filter((item) => item.id !== id));
+  }
+
   return (
     <>
       <div className="app">
         <Header />
-        <Form />
-        <PackingList />
+        <Form onAddItem={handleAddItem} />
+        <PackingList
+          items={item}
+          onDelete={deleteItem}
+          handleBoxClick={handleBoxClick}
+        />
         <Stats />
       </div>
     </>
@@ -24,10 +40,10 @@ function Header() {
   return <h1>🌴Far Away 👜</h1>;
 }
 
-function Form(e) {
+function Form({ onAddItem }) {
   const [description, setDescription] = useState("");
 
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -40,7 +56,8 @@ function Form(e) {
       quantity,
       packed: false,
     };
-    // console.log(newList);
+
+    onAddItem(newList);
     setDescription("");
     setQuantity(1);
   }
@@ -63,32 +80,38 @@ function Form(e) {
         placeholder="item..."
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-      ></input>
+      />
       <button>Add</button>
     </form>
   );
 }
 
-function Item({ item }) {
+function Item({ item, onDelete, handleBoxClick }) {
   return (
     <>
       <li>
+        <input type="checkbox" onClick={() => handleBoxClick(item.id)} />
         <span style={item.packed ? { textDecoration: "line-through" } : {}}>
           {item.quantity}
-          {item.description}
+          {" " + item.description}
         </span>
-        <button>❌</button>
+        <button onClick={() => onDelete(item.id)}>❌</button>
       </li>
     </>
   );
 }
 
-function PackingList() {
+function PackingList({ items, onDelete, handleBoxClick }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((item) => (
-          <Item item={item} key={item.id} />
+        {items.map((item) => (
+          <Item
+            item={item}
+            onDelete={onDelete}
+            handleBoxClick={handleBoxClick}
+            key={item.id}
+          />
         ))}
       </ul>
     </div>
