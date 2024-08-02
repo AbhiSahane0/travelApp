@@ -28,6 +28,7 @@ function App() {
           items={item}
           onDelete={deleteItem}
           handleBoxClick={handleBoxClick}
+          onSetItem={setItem}
         />
         <Stats item={item} />
       </div>
@@ -101,11 +102,36 @@ function Item({ item, onDelete, handleBoxClick }) {
   );
 }
 
-function PackingList({ items, onDelete, handleBoxClick }) {
+function PackingList({ items, onDelete, handleBoxClick, onSetItem }) {
+  const [action, setAction] = useState("");
+
+  console.log(action);
+
+  let sortedItem = items;
+
+  function handleClick() {
+    // sortedItem = [];
+    onSetItem((items) => []);
+  }
+
+  if (action === "Input") {
+    sortedItem = items;
+  }
+  if (action === "description") {
+    sortedItem = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  }
+  if (action === "Packed") {
+    sortedItem = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
+  }
+
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortedItem.map((item) => (
           <Item
             item={item}
             onDelete={onDelete}
@@ -114,29 +140,30 @@ function PackingList({ items, onDelete, handleBoxClick }) {
           />
         ))}
       </ul>
+
+      <select className="action" onChange={(e) => setAction(e.target.value)}>
+        <option value="Input">Sort by Input</option>
+        <option value="description">Sort by description</option>
+        <option value="Packed">Sort by Packed</option>
+      </select>
+      <button onClick={handleClick}>Clear List</button>
     </div>
   );
 }
 
 function Stats({ item }) {
-  if (item.length >= 1) {
-    const length = item.length;
-    const packed = item.filter((items) => items.packed === true).length;
-    const percentage = Math.round(length / packed) * 100;
-    return (
-      <footer className="stats">
-        <em>
-          You have {length} items in your list and you have already picked up{" "}
-          {packed} item (
-          {percentage > 0 && percentage <= 100 ? percentage : 0 + "%"})
-        </em>
-      </footer>
-    );
-  } else {
-    return (
-      <footer className="stats">
-        <em>Start packing item now ✈️</em>
-      </footer>
-    );
-  }
+  const length = item.length;
+  const packed = item.filter((items) => items.packed).length;
+  const percentage = Math.round((packed / length) * 100);
+
+  return (
+    <footer className="stats">
+      <em>
+        {percentage === 100
+          ? `You packed everything ! Ready to go 🚀`
+          : `You have ${length} items in your list and you have already picked up
+        ${packed} item (${percentage}%)`}
+      </em>
+    </footer>
+  );
 }
